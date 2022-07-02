@@ -1,0 +1,131 @@
+Protocolo DJANGO
+================
+
+No prompt de comando:
+--------------------
+1) Criar diretório: mkdir gestao_rh
+2) criar ambiente virtual: python -m venv venv
+3) Activar ambiente virtual: venv\Scripts\activate
+4) Instalar o Django: pip install django
+
+Abre o PyCharm
+--------------
+1) verifica se ele já entrou no ambiente virtual
+2) Abrir o projeto gestao_rh
+3) Em > File > Settings: Procurar 'Interpreter'
+4) Verifica se em 'Python Interpreter' está o
+    caminho do ambiente virtual do projeto
+    Caso não esteja configurar para o endereço:
+    venv\Scripts\Python.exe
+
+
+Criação do Projeto
+------------------
+1) No Terminal do PyCharm com o ambiente virtual ativado digite:
+    django-admin startproject gestao_rh .
+    (o ponto faz parte do comando. É para não criar uma subpasta
+    com o mesmo nome do projeto já que fizemos isso antes)
+2) Nesse ponto pode-se testar o sistema com: python manage.py runserver
+
+3) Agora vamos criar o banco através do comando: python manage.py migrate
+
+4) Criação de superuser: python manage.py createsuperuser
+    Informe nome do usuário: admin
+    Um email: (pode ficar vazio)
+    A senha e a confirmação de senha
+    Feito isso se colocar http://127.0.0.1:8000/admin já terá o ambiente
+    de administração pronto
+
+
+Criação de comando rápidos
+--------------------------
+Para agilizar inicialmente os comandos runserver, makemigrations e migrate faça:
+Em 'Edit Configurations' adicione a seguinte configuração:
+    Em 'Name' informe o nome(livre) do comando: runserver
+    Em 'Script Path' coloque o caminho de gestao_rh\manage.py
+    Em 'Parameters' informe o comando: runserver
+    Dê OK e repita essa operação para os outros comandos
+
+Agora quando precisar é só clicar em executar no comando.
+
+
+Trabalhando com Versionamento e Repositório
+-------------------------------------------
+Git
+----
+Configuração no PyCharm:
+    1) Em > File > Settings: Procurar 'Terminal'
+    2) Em 'Shell Path': Colocar o endereço de GitBash:
+        "C:\Program Files\Git\bin\sh.exe" --login -i
+
+
+1) git init
+2) git add .
+3) git commit -m "First Commit"
+4) git remote add origin https://github.com/japeri/gestao_rh
+5) git push -u origin master
+
+Arquivo de exclusões:
+---------------------
+1) No diretório principal do projeto crie o arquivo .gitignore
+    Coloque as seguintes linhas:
+    .idea
+    *.sqlite3
+    venv
+
+
+Criação do Diretório apps:
+-------------------------
+Com botão direito sobre o nome do projeto, escolha:
+> New > Python Package
+Dê o nome de apps
+
+Criação de uma Aplicação (empresas):
+------------------------------------
+1) Na linha de comando do ambiente virtual:
+    python manage.py startapp empresas
+2) Arraste o diretório empresas para dentro de apps ********* Isso não funcionou dentro de apps ***>
+3) Configure > gestao_rh > settings.py
+INSTALLED_APPS = [
+    ...
+    ...
+    ...
+    'empresas',
+]
+
+Escrevendo o Modelo de dados
+----------------------------
+Em > empresas > models.py:
+from django.db import models
+
+
+class Empresa(models.Model):
+    nome = models.CharField(max_length=100, help_text='Nome da Empresa')
+
+
+Makemigrations e Migrate:
+1) Execute o comando:
+python manage.py makemigrations
+E depois:
+python manage.py migrate
+
+
+Em > empresas > admin.py:
+from django.contrib import admin
+from .models import Empresa
+
+
+admin.site.register(Empresa)
+
+
+
+
+
+
+
+
+
+
+
+
+
