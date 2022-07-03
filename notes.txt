@@ -118,10 +118,48 @@ from .models import Empresa
 admin.site.register(Empresa)
 
 
+CONEXÕES ENTRE TABELAS
+======================
+Conectando tabela de Funcionários a de Usuários
+-----------------------------------------------
+1) Em > funcionarios > models.py import:
+from django.contrib.auth.models import User
+from departamentos.models import Departamento
+
+2) Na class Funcionario incluir a linha:
+user = models.ForeignKey(User, on_delete=models.PROTECT)
+
+3) Criando uma lista de departamento:
+departamentos = models.ManyToManyField(Departamento)
 
 
+Conectando tabela de Funcionários a de Documentos
+-----------------------------------------------
+pertence = models.ForeignKey(Funcionario, on_delete=models.SET_NULL, null=True, blank=True)
+1) Em > documentos > models.py import:
+from funcionarios.models import Funcionario
+
+2) Na class Documento incluir a linha:
+pertence = models.ForeignKey(Funcionario, on_delete=models.SET_NULL, null=True, blank=True)
 
 
+Conectando tabela de Funcionários a de Empresas
+-----------------------------------------------
+1) Em > funcionarios > models.py import:
+from empresas.models import Empresa
+
+2) Na class Funcionario incluir a linha:
+empresa = models.ForeignKey(Empresa, on_delete=models.PROTECT)
+
+
+CONCLUSÃO:
+==========
+No arquivo models.py que terá a chave estrangeira:
+1) Importa a classe referência da chave:
+from empresas.models import Empresa
+
+2) Inclui o atributo correspondente:
+empresa = models.ForeignKey(Empresa, on_delete=models.PROTECT)
 
 
 
