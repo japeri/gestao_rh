@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block main %}
+    <h1>SGP2022 - Sistema de Gerenciamento de Permissionários</h1>
+  <hr>
+  <div class="row">
+    <div class="col-sm">
+      Ola {{ usuario.funcionario.nome }} </div>
+    <div class="col-sm">
+      <a href="{% url 'list_funcionarios' %}">Funcionários</a>
+      <br>
+      <a href="{% url 'list_departamentos' %}">Departamentos</a>
+      <br>
+      <a href="{% url 'list_empresas' %}">Empresas</a>
+      <br>
+      <a href="{% url 'list_documentos' %}">Documentos</a>
+
+    </div>
+    <div class="col-sm">
+      <a href="{% url 'logout' %}">Logout</a> <br>
+
+      {% if usuario.funcionario.empresa %}
+      {{ usuario.funcionario.empresa }}
+      (<a href="{% url 'update_empresa' usuario.funcionario.empresa.id %}">Editar</a>)
+      {% else %}
+      <a href="{% url 'create_empresa' %}">Criar empresa</a>
+      {% endif %}
+    </div>
+  </div>
+<hr>
+Desenvolvido por Vicente Japeri
+{% endblock %}

@@ -163,7 +163,283 @@ empresa = models.ForeignKey(Empresa, on_delete=models.PROTECT)
 
 
 
+TEMPLATES
+=========
+Criar a pasta 'templates' na raiz do projeto.
 
+No arquivo settings:
+--------------------
+1) Limpar os comentários de settings.py
+2) Deteminar na sessão TEMPLATES / DIRS:
+    'DIRS' : ['templates'], ...
+3) LANGUAGE_CODE = 'pt-br'
+4) TIME_ZONE = 'America/Sao_Paulo'
+5) USE_I18N = True
+6) USE_L10N = True
+7) USE_TZ = True
+
+8) Criar o arquivo: base.html
+<!doctype html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{% block title %} {% endblock %}</title>
+</head>
+<body>
+    {% block main %} {% endblock %}
+</body>
+</html>
+
+9) Configurar em gestao_rh > urls.py:
+from django.contrib import admin
+from django.urls import path, include
+
+urlpatterns = [
+    path('funcionarios/', include('funcionarios.urls')),
+    ...
+]
+
+Assim, tudo que começar com funcionários vai buscar em funcionarios > urls.py
+
+10) Definir uma view em: funcionarios > views.py:
+from django.http import HttpResponse
+
+def home(request):
+    return HttpResponse('Olá')
+
+
+11) Em funcionarios > urls.py:
+from django.urls import path
+from .views import home
+
+urlpatterns = [
+    path('', home),
+]
+
+CRIAÇÃO DA APLICAÇÃO CORE, app para centralizar a entrada (login):
+=================================================================
+1) No Terminal:  python manage.py startapp core
+
+2) Em settings.py:
+INSTALLED_APPS = [
+    ...
+    'core',
+]
+
+3) Em gestao_rh > urls.py, acrescente a seguinte linha:
+urlpatterns = [
+    path('', include('core.urls')),
+    ...
+]
+
+4) Crie o arquivos core > urls.py
+from django.urls import path
+from .views import home
+
+
+urlpatterns = [
+    path('', home),
+]
+
+5) No arquivo core > views.py:
+from django.shortcuts import render
+
+def home(request):
+    return render(request, 'core/index.html')
+
+
+6) Crie os diretórios: core > templates > core:
+E dentro de templates > core, o arquivo index.html:
+{% extends 'base.html' %}
+
+{% block main %}
+    <h1>Seja bem vindo</h1>
+{% endblock %}
+
+
+
+Criação de estilo com Bootstrap
+===============================
+1) Baixar arquivo de estilos em:
+https://getbootstrap.com/docs/4.1/getting-started/download/
+Vai baixar duas pastas: css e js
+
+2) Criar as pastas:
+static/bootstrap e inserir as duas pastas baixadas
+
+3) Inserir na primeira linha de templates > base.html:
+{% load static %}
+
+4) Inserir as linhas abaixo em settings.py:
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),
+]
+
+Adicionando um exemplo de grid:
+-------------------------------
+Insira o código abaixo envolvendo o block main em base.html
+<div class="container">
+    {% block main %} {% endblock %}
+</div>
+
+Agora coloque as linhas abaixo no block main de core > index.html
+  <div class="row">
+    <div class="col-sm">
+      One of three columns
+    </div>
+    <div class="col-sm">
+      One of three columns
+    </div>
+    <div class="col-sm">
+      One of three columns
+    </div>
+  </div>
+
+
+IMPLEMENTANDO O LOGIN e o LOGOUT
+================================
+1) Em gestao_rh > urls.py:
+urlpatterns = [
+    ...
+    path('accounts/', include('django.contrib.auth.urls')),
+]
+
+2) Em templates criar pasta registration
+
+3) Nessa pasta criar o arquivo login.html
+{% extends 'base.html' %}
+
+{% block main %}
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Login</button>
+  </form>
+{% endblock %}
+
+4) Em settings.py inserir a linha:
+LOGIN_REDIRECT_URL = 'home'
+
+5) Em core > urls.py altere a linha:
+urlpatterns = [
+    path('', home, name='home'),
+]
+
+Implementar a obrigatoriedade de estar logado
+---------------------------------------------
+Em core > views.py insira essas duas linhas:
+from django.contrib.auth.decorators import login_required
+@login_required
+def ...
+
+Implementar abrir página de login depois do logout:
+Insira a linha abaixo em settings:
+LOGOUT_REDIRECT_URL = 'login'
+
+
+
+PREPARAÇÃO DA PÁGINA APÓS O LOGIN
+====================================
+Para filtrar informações de usuário depois do login proceda assim:
+1) Em core > views.py organize o código da seguinte forma:
+from funcionarios.models import Funcionario
+@login_required
+def home(request):
+    data = {}
+    data['usuario'] = request.user
+    return render(request, 'core/index.html', data)
+
+2) Em templates > core > index.html faça a referência :
+Ola {{ usuario.funcionario.nome }}
+
+3) Mais algumas linhas de código de uso desses dados
+ para nosso exemplo:
+      {% if usuario.funcionario.empresa %}
+      <a href="">Editar empresa</a>
+      {% else %}
+      <a href="">Criar empresa</a>
+      {% endif %}
+
+
+CRUD - Empresas
+====================================
+1) Em empresas > views.py:
+from django.shortcuts import render
+from django.views.generic.edit import CreateView
+from .models import Empresa
+
+class EmpresaCreate(CreateView):
+    model = Empresa
+    fields = ['nome']
+
+2) Em empresas > urls.py:
+from django.urls import path
+from .views import EmpresaCreate
+
+urlpatterns = [
+    path('novo', EmpresaCreate.as_view(), name='create_empresa'),
+]
+
+3) Em gestao_rh > urls.py:
+urlpatterns = [
+    ...
+    path('empresa/', include('empresas.urls')),
+    ...
+]
+
+4) Criar em templates > empresas > empresa_form.html:
+{% extends 'base.html' %}
+
+{% block main %}
+<form method="post">
+    {% csrf_token %}
+    {{ form }}
+    <p><button type="submit">Salvar</button></p>
+</form>
+{% endblock %}
+
+
+Linkar o funcionario com a empresa criada:
+-----------------------------------------
+Em empresas > views.py acrescente o código:
+class EmpresaCreate(CreateView):
+    ...
+    def form_valid(self, form):
+        obj = form.save()
+        funcionario =self.request.user.funcionario
+        funcionario.empresa = obj
+        funcionario.save()
+        return HttpResponse('OK')
+
+
+Editar empresa:
+----------------
+1) Em empresas > urls.py:
+from .views import EmpresaCreate, EmpresaEdit
+urlpatterns = [
+    ...
+    path('editar/<int:pk>/',
+         EmpresaEdit.as_view(), name='edit_empresa'),
+]
+
+2) Em empresas > views.py:
+class EmpresaEdit(CreateView):
+    model = Empresa
+    fields = ['nome']
+
+3) Em templates > core > index.html, acrescente ao link:
+      {% if usuario.funcionario.empresa %}
+>>    <a href="{% url 'edit_empresa' usuario.funcionario.empresa.id %}">Editar empresa</a>
+      {% else %}
+      <a href="">Criar empresa</a>
+      {% endif %}
+
+
+CRUD - Funcionarios
+--------------------------------------------
 
 
 

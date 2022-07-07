@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block main %}
+<h1>Empresas</h1>
+<hr>
+<form method="post">
+    {% csrf_token %}
+    <h1>TEM CERTEZA DE QUE DESEJA EXCLUIR A EMPRESA: {{ obj }} ?</h1>
+    {{ form }}
+    <button type="submit" class="btn btn-danger">Confirmar</button>
+</form>
+
+{% endblock %}

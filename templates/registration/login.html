@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% load bootstrap %}
+
+{% block main %}
+<h3>Acesso ao SGP2022</h3>
+<hr>
+  <form method="post">
+    {% csrf_token %}
+    {{ form|bootstrap }}
+    <button type="submit" class="btn btn-info">Login</button>
+  </form>
+<hr>
+{% endblock %}
